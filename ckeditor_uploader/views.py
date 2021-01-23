@@ -180,13 +180,13 @@ def get_image_files(user=None, path=""):
             yield element
 
 
-def get_files_browse_urls(user=None):
+def get_files_browse_urls(user=None, path=""):
     """
     Recursively walks all dirs under upload dir and generates a list of
     thumbnail and full image URL's for each file found.
     """
     files = []
-    for filename in get_image_files(user=user):
+    for filename in get_image_files(user=user, path=path):
         src = utils.get_media_url(filename)
         if getattr(settings, "CKEDITOR_IMAGE_BACKEND", None):
             if is_valid_image_extension(src):
@@ -212,7 +212,9 @@ def get_files_browse_urls(user=None):
 
 
 def browse(request):
-    files = get_files_browse_urls(request.user)
+    origin_url = request.headers['Referer']
+    article_id = origin_url.split('/')[-1]
+    files = get_files_browse_urls(request.user, article_id)
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
